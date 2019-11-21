@@ -18,3 +18,4 @@ conf
 *.log
 f_aiohttp.py
 first_cor.py
+loadtest.py

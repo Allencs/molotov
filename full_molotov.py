@@ -113,6 +113,12 @@ scenario_failure: scenario, exception, wid
 
 @molotov.events()
 async def show_worker(event, **workers):
+    """
+    current number of workers, it is tuple
+    :param event: molotov event
+    :param workers:
+    :return:
+    """
     if event == 'current_workers':
         print("=>")
 
@@ -129,6 +135,30 @@ async def print_request(event, **info):
         print("=>")
 
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+'''
+use the events fixture to record the time and 
+calculate the average response time.
+'''
+def _now():
+    return time.time() * 1000
+    
+@molotov.events()
+async def record_time(event, **info):
+    req = info.get('request')
+    if event == 'sending_request':
+        _T[req] = _now()
+    elif event == 'response_received':
+        _T[req] = _now() - _T[req]
+
+
+@molotov.global_teardown()
+def display_average():
+    average = sum(_T.values()) / len(_T)
+    print("\nAverage response time %dms" % average)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
 """同步请求
 from molotov import global_setup, json_request, set_var
 
@@ -137,3 +167,4 @@ from molotov import global_setup, json_request, set_var
 def _setup():
     set_var('token', json_request('http://example.com')['content'])
 """
+

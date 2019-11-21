@@ -9,6 +9,7 @@ _API = 'http://localhost:8080/pftest/myApi/token'
 
 _T = {}
 _workers = {"works": 0}
+_scenario = {"scenario": None}
 
 
 def _now():
@@ -35,17 +36,46 @@ scenario_failure: scenario, exception, wid
 
 
 @molotov.events()
-async def show_worker(event, **workers):
+async def show_worker(event, **info):
     """
     current number of workers, it is tuple
     :param event: molotov event
-    :param workers:
+    :param info:
     :return:
     """
     if event == 'current_workers':
-        if _workers['works'] != workers['workers']:
-            _workers['works'] = workers['workers']
-            print("hi, current number of works is {}".format(_workers['works']))
+        if _workers['works'] != info['workers']:
+            _workers['works'] = info['workers']
+            print("hi, current number of works is {}\n".format(_workers['works']))
+
+
+@molotov.events()
+async def scenario_info(event, **info):
+    """
+    info receives variable like {'wid': 0, 'scenario': {'name': 'scenario_one', 'weight': 100,
+    'delay': 0.0, 'func': <function scenario_one at 0x000001787C341BF8>, 'args': (), 'kw': {}}}
+    :param event:
+    :param info:
+    :return:
+    """
+    if event == 'scenario_start':
+        if _scenario['scenario'] != info['scenario']['name']:
+            _scenario['scenario'] = info['scenario']['name']
+            print("***scenario [{}] is running\n".format(_scenario['scenario']))
+
+
+'''
+@molotov.events()
+async def show_scenario_success(event, **info):
+    """
+    the format of info receives variable is the same as scenario_start
+    :param event:
+    :param info:
+    :return: 
+    """
+    if event == 'scenario_success':
+        print("%%%{}".format(info))
+'''
 
 
 @molotov.events()

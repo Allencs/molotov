@@ -4,7 +4,7 @@ from molotov import scenario
 import molotov
 
 
-_API = 'http://localhost:8080/pftest/myApi/token'
+_API = 'http://10.203.29.217:8085/pftest/myApi/token'
 
 
 _T = {}
@@ -14,6 +14,14 @@ _scenario = {"scenario": None}
 
 def _now():
     return time.time() * 1000
+
+
+d_time = {}
+
+
+@molotov.global_setup()
+def init_test(args):
+    d_time["startTime"] = time.time()
 
 
 @scenario(weight=100)
@@ -80,6 +88,7 @@ async def show_scenario_success(event, **info):
 
 @molotov.events()
 async def record_time(event, **info):
+    d_time["endTime"] = time.time()
     req = info.get('request')
     if event == 'sending_request':
         _T[req] = _now()
@@ -90,7 +99,7 @@ async def record_time(event, **info):
 @molotov.global_teardown()
 def display_average():
     average = sum(_T.values()) / len(_T)
-    TPS = float(len(_T) / (sum(_T.values()) / 1000))
+    TPS = len(_T) / (d_time["endTime"] - d_time["startTime"])
     print("===============================================")
     print("+++Average ResponseTime %dms" % average)
     print("+++TPS %.2f" % TPS)
